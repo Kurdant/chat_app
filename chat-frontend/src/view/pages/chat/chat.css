@@ -1,0 +1,23 @@
+.Chatinterface{
+    border: white 1px solid;
+    height: 300px;
+    width: 500px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.Chat1{
+    min-height: 20px;
+    height: 20px;
+    min-width: 100px;
+    width: 100px;
+    border: whitesmoke 1px solid;
+}
+.Chat2{
+    min-height: 20px;
+    height: 20px;
+    min-width: 100px;
+    width: 100px;
+    border: whitesmoke 1px solid;
+}

@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv'); // Ajouter l'import de dotenv
+const dotenv = require('dotenv'); 
+const db = require('./db');
+
 
 
 dotenv.config();
@@ -24,13 +26,19 @@ app.use('/images', imageRoutes);
 const usersRoute = require('./routes/users');
 app.use('/users', usersRoute);
 
-// ROUTE LOGIN
+// ROUTE AUTH
+const authRoutes = require('./middleware/auth');
+app.use('/auth', authRoutes);
+
 const loginRoute = require('./routes/login');
 app.use('/login', loginRoute);
 
+const signupRoute = require('./routes/signup');
+app.use('/signup', signupRoute);
+
 // ROUTE MESSAGES
 const messagesRoutes = require('./routes/messages');
-app.use('/messages', messagesRoutes);
+app.use('/messages', messagesRoutes(db)); // ✅ OK
 
 // ROUTE CONVERSATION
 app.get('/messages/conversation/:id1/:id2', (req, res) => {

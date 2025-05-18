@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { NavLink, useFetcher, useNavigate } from 'react-router';
 import axios from 'axios';
 import api from '../../../services/api';
 import '../login/login.css';
 
 function Login() {
   const [users, setUsers] = useState([]);
+  const [mail, setMail] = useState(''); // Inscription : email
   const [nom, setNom] = useState('');
-  const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
+  
+  // Connexion
+  const [mail2, setMail2] = useState(''); // Connexion : email
+  const [password2, setPassword2] = useState('');
+  const [user, setUser] = useState([]);
+
   const [file, setFile] = useState(null);
   const [images, setImages] = useState([]);
-
 
   useEffect(() => {
     api.get('/users')
@@ -23,10 +28,10 @@ function Login() {
       });
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmitSignup = (e) => {
     e.preventDefault();
 
-    api.post('/login', {
+    api.post('/signup', {
       username: nom,
       email: mail,
       password: password,
@@ -42,6 +47,28 @@ function Login() {
       });
   };
 
+  const handleSubmitLogin = (e) => {
+    e.preventDefault();
+
+    api.post('/login', {
+      email: mail2,
+      password: password2,
+    })
+    .then((res) => {
+      console.log(res.data.user.username); // Vérifie ce que tu reçois ici
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('username', res.data.user.username);      
+      } else {
+        console.error("Token non trouvé dans la réponse");
+      }
+      navigate('/chat');
+    })
+    .catch((err) => {
+      console.error("Erreur lors de la connexion:", err);
+    });
+  };
+
   const handleChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -54,14 +81,23 @@ function Login() {
 
     try {
       const res = await axios.post('http://localhost:3000/images/upload', formData);
-      alert('Image envoyée ! URL : ' + res.data.url);
-      setFile(null); // reset input si tu veux
-      fetchImages(); // recharge les images après upload
+      setFile(null); 
+      fetchImages(); 
     } catch (err) {
       console.error(err);
       alert("Erreur lors de l'upload");
     }
   };
+
+  const handleDelete = (id) => {
+    axios.delete(`http://localhost:3000/users/${id}`)
+    .then((res) => {
+      setUsers(users.filter(user => user.id !== id))
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+  }
 
   const fetchImages = () => {
     axios.get('http://localhost:3000/images/')
@@ -77,12 +113,19 @@ function Login() {
     fetchImages();
   }, []);
 
+  const deconnexion = (e) => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+  }
+
   return (
     <div className='login'>
+
+      {/* SIGNUP */}
       <div>
-        <h1>Log toi</h1>
-        <h2>Je me log</h2>
-        <form onSubmit={handleSubmit}>
+        <h1>Créer un compte</h1>
+        <h2>Inscription</h2>
+        <form onSubmit={handleSubmitSignup}>
           <label>
             Nom :
             <input type="text" name="name" value={nom} onChange={(e) => setNom(e.target.value)} />
@@ -99,18 +142,39 @@ function Login() {
         </form>
       </div>
 
+      {/* LOGIN */}
+      <div>
+        <h1>Se connecter</h1>
+        <h2>Connexion</h2>
+        <form onSubmit={handleSubmitLogin}>
+          <label>
+            Mail :
+            <input type="email" name="mail2" value={mail2} onChange={(e) => setMail2(e.target.value)} />
+          </label>
+          <label>
+            Password :
+            <input type="password" name="password2" value={password2} onChange={(e) => setPassword2(e.target.value)} />
+          </label>
+          <input type="submit" value="Envoyer" />
+        </form>
+        <button onClick={deconnexion}>Deconnexion</button>
+      </div>
+      <NavLink to='/chat'>chat</NavLink>
+
+      {/* LISTE USERS */}
       <div className='jesuislog'>
-      <h1>Liste des utilisateurs</h1>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>
-            {user.username} - {user.email}
-            <button onClick={() => handleDelete(user.id)}>Supprimer</button>
-          </li>
-        ))}
-      </ul>
+        <h1>Liste des utilisateurs</h1>
+        <ul>
+          {users.map(user => (
+            <li key={user.id}>
+              {user.username} - {user.email}
+              <button onClick={() => handleDelete(user.id)}>Supprimer</button>
+            </li>
+          ))}
+        </ul>
       </div>
 
+      {/* IMAGES */}
       <div className='uploadimages'>
         <h1>Rajouter une image</h1>
         <p>rajoute une image maintenant</p>
