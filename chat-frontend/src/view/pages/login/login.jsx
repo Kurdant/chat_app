@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useFetcher, useNavigate } from 'react-router';
+import { NavLink, useFetcher } from 'react-router';
 import axios from 'axios';
 import api from '../../../services/api';
 import '../login/login.css';
@@ -55,10 +55,11 @@ function Login() {
       password: password2,
     })
     .then((res) => {
-      console.log(res.data.user.username); // Vérifie ce que tu reçois ici
+      console.log(res.data.user.username); 
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
-        localStorage.setItem('username', res.data.user.username);      
+        localStorage.setItem('username', res.data.user.username);     
+        localStorage.setItem('email', res.data.user.email); 
       } else {
         console.error("Token non trouvé dans la réponse");
       }

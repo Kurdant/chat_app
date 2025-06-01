@@ -1,35 +1,37 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import "../chat/chat.css";
 
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
-  
-  // ✅ À adapter : tu peux stocker ça dans Redux ou localStorage dans la vraie app
-  const token = localStorage.getItem("token"); 
-  const receiverId = 25; // ✅ À remplacer dynamiquement selon l'utilisateur cible
+  const [friendRequest, setFriendRequest] = useState("");
+  const [inputFriend, setInputFriend] = useState("");
+  const [username, setUsername] = useState("");
+  const [friendsRequests, setFriendsRequests] = useState([]);
+  const [friends, setFriends] = useState([]);
 
-    const [username, setUsername] = useState('');
 
-    useEffect(() => {
-      const storedUsername = localStorage.getItem('username')
+  const token = localStorage.getItem("token");
+  const receiverId = 25; // À remplacer dynamiquement
+
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
-      setUsername(storedUsername)
-    } 
-    })
+      setUsername(storedUsername);
+    }
+  }, []); // <- Ajout du tableau de dépendances
 
-
-  function setNewMessage(msg) {
-    setMessages((prev) => [...prev, msg]);
-  }
-
-  function handleInputChange(e) {
+  const handleInputChange = (e) => {
     setInputText(e.target.value);
-  }
+  };
 
-  async function sendMessage(e) {
+  const setNewMessage = (msg) => {
+    setMessages((prev) => [...prev, msg]);
+  };
+
+  const sendMessage = async (e) => {
     e.preventDefault();
-
     const pendingMsg = { text: inputText, status: "pending" };
     setNewMessage(pendingMsg);
 
@@ -38,7 +40,7 @@ function Chat() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           receiver_id: receiverId,
@@ -51,39 +53,33 @@ function Chat() {
       }
 
       const data = await response.json();
-
       const sentMsg = {
         text: inputText,
         status: "sent",
         id: data.id,
       };
 
-      // Met à jour l'état avec le message confirmé
-      setMessages((prevMessages) =>
-        prevMessages.map((m) => (m === pendingMsg ? sentMsg : m))
+      setMessages((prev) =>
+        prev.map((m) => (m === pendingMsg ? sentMsg : m))
       );
     } catch (error) {
       console.error("Erreur lors de l'envoi :", error);
-      setMessages((prevMessages) =>
-        prevMessages.map((m) =>
+      setMessages((prev) =>
+        prev.map((m) =>
           m === pendingMsg ? { ...m, status: "failed" } : m
         )
       );
     }
 
-    setInputText(""); // Vide le champ
-  }
+    setInputText("");
+  };
 
   return (
-    <div className="container">
-      <div className="card-title">My first chat</div>
-      <hr />
-
+   
+    <div>
       <form onSubmit={sendMessage}>
         <div className="card-footer">
           <p>Username : {username}</p>
-          <p>Futur Username</p>
-          <br />
           <div className="messages">
             {messages.map((msg, index) => (
               <div
@@ -110,7 +106,7 @@ function Chat() {
           />
           <br />
           <button type="submit" className="btn btn-primary form-control">
-            Send
+            Send Message
           </button>
         </div>
       </form>

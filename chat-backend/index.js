@@ -4,8 +4,6 @@ const path = require('path');
 const dotenv = require('dotenv'); 
 const db = require('./db');
 
-
-
 dotenv.config();
 
 const app = express();
@@ -40,33 +38,37 @@ app.use('/signup', signupRoute);
 const messagesRoutes = require('./routes/messages');
 app.use('/messages', messagesRoutes(db)); // ✅ OK
 
-// ROUTE CONVERSATION
+// ROUTE FRIEND
+const friendRequestRoutes = require('./routes/friend-request');
+app.use('/friendrequest', friendRequestRoutes); 
+
+
 app.get('/messages/conversation/:id1/:id2', (req, res) => {
-    const { id1, id2 } = req.params;
-  
-    if (!id1 || !id2) {
-      return res.status(400).json({ error: 'Les identifiants des utilisateurs sont requis' });
+  const { id1, id2 } = req.params;
+
+  if (!id1 || !id2) {
+    return res.status(400).json({ error: 'Les identifiants des utilisateurs sont requis' });
+  }
+
+  // Requête SQL pour récupérer les messages entre les deux utilisateurs
+  const query = `
+    SELECT * FROM messages
+    WHERE (sender_id = ? AND receiver_id = ?)
+       OR (sender_id = ? AND receiver_id = ?)
+    ORDER BY timestamp ASC
+  `;
+
+  db.execute(query, [id1, id2, id2, id1], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Une erreur est survenue lors de la récupération des messages.' });
     }
-  
-    // Requête SQL pour récupérer les messages entre les deux utilisateurs
-    const query = `
-      SELECT * FROM messages
-      WHERE (sender_id = ? AND receiver_id = ?)
-         OR (sender_id = ? AND receiver_id = ?)
-      ORDER BY timestamp ASC
-    `;
-  
-    db.execute(query, [id1, id2, id2, id1], (err, results) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Une erreur est survenue lors de la récupération des messages.' });
-      }
-      if (results.length === 0) {
-        return res.status(404).json({ message: 'Aucun message trouvé pour cette conversation.' });
-      }
-      return res.json(results);
-    });
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Aucun message trouvé pour cette conversation.' });
+    }
+    return res.json(results);
   });
+});
 
 // Lancement du serveur
 app.listen(3000, () => {

@@ -1,3 +1,19 @@
+.ChatFriendRequest{
+    display: flex;
+}
+
+.ChatSide{
+    background-color: green;
+}
+
+.FriendRequestSide{
+    background-color: blueviolet;
+}
+
+.FriendsSide{
+    background-color: rgb(202, 111, 0);
+}
+
 .Chatinterface{
     border: white 1px solid;
     height: 300px;
