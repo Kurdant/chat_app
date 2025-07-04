@@ -5,22 +5,17 @@ import "../chat/chat.css";
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
-  const [friendRequest, setFriendRequest] = useState("");
-  const [inputFriend, setInputFriend] = useState("");
   const [username, setUsername] = useState("");
-  const [friendsRequests, setFriendsRequests] = useState([]);
-  const [friends, setFriends] = useState([]);
-
 
   const token = localStorage.getItem("token");
-  const receiverId = 25; // À remplacer dynamiquement
+  const receiverId = 25; 
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
       setUsername(storedUsername);
     }
-  }, []); // <- Ajout du tableau de dépendances
+  }, []);
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
@@ -36,7 +31,7 @@ function Chat() {
     setNewMessage(pendingMsg);
 
     try {
-      const response = await fetch("http://localhost:3000/messages", {
+      const response = await axios("http://localhost:3000/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,6 +75,7 @@ function Chat() {
       <form onSubmit={sendMessage}>
         <div className="card-footer">
           <p>Username : {username}</p>
+          {/* <p>Username : {friend}</p> */}
           <div className="messages">
             {messages.map((msg, index) => (
               <div

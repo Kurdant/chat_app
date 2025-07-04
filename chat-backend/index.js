@@ -15,6 +15,10 @@ app.use(express.json());
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // ROUTES
+app.post('/test', (req, res) => {
+  console.log("✅ Requête test reçue :", req.body);
+  return res.status(200).json({ message: "Réponse test ok" });
+});
 
 // ROUTE IMAGE
 const imageRoutes = require('./routes/image');
